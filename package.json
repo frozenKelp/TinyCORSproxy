@@ -1,0 +1,6 @@
+{
+  "name": "tinycorsproxy",
+  "dependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
