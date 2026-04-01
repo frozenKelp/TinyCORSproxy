@@ -10,7 +10,7 @@ export default {
       });
     }
 
-    if (params.get('key') !== 'yoursecretkey') {
+    if (params.get('key') !== 'phukoff') {
       return new Response('Forbidden', { status: 403 });
     }
 
