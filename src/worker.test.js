@@ -51,6 +51,7 @@ describe('preview URL safety', () => {
 describe('preview worker', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.useRealTimers();
   });
 
   it('returns JSON preview data with CORS headers and no raw HTML body', async () => {
@@ -102,6 +103,64 @@ describe('preview worker', () => {
 
       expect(response.headers.get('access-control-allow-origin')).toBe(origin);
     }
+  });
+
+  it('does not reuse cached CORS allow-origin headers for disallowed origins', async () => {
+    const cachedResponses = new Map();
+    vi.stubGlobal('caches', {
+      default: {
+        match: vi.fn(async (request) => cachedResponses.get(request.url)),
+        put: vi.fn(async (request, response) => {
+          cachedResponses.set(request.url, response.clone());
+        })
+      }
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response(sampleHtml, {
+        headers: { 'content-type': 'text/html; charset=utf-8' }
+      }))
+    );
+
+    const url =
+      'https://preview.test/preview?url=https%3A%2F%2Fexample.com%2Fstory';
+    const first = await worker.fetch(
+      new Request(url, { headers: { origin: 'https://frozenkelp.vip' } })
+    );
+    const second = await worker.fetch(
+      new Request(url, { headers: { origin: 'https://evil.test' } })
+    );
+
+    expect(first.headers.get('access-control-allow-origin')).toBe(
+      'https://frozenkelp.vip'
+    );
+    expect(second.headers.get('access-control-allow-origin')).toBeNull();
+  });
+
+  it('returns JSON failure when a preview fetch times out', async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        (_url, init) =>
+          new Promise((_resolve, reject) => {
+            init.signal.addEventListener('abort', () => reject(new Error('aborted')));
+          })
+      )
+    );
+
+    const responsePromise = worker.fetch(
+      new Request(
+        'https://preview.test/preview?url=https%3A%2F%2Fslow.example%2Fstory'
+      )
+    );
+    await vi.advanceTimersByTimeAsync(4_500);
+    const response = await responsePromise;
+    const body = await response.json();
+
+    expect(response.status).toBe(502);
+    expect(response.headers.get('content-type')).toContain('application/json');
+    expect(body).toEqual({ error: 'preview_failed' });
   });
 
   it('rejects unsafe preview targets before fetching', async () => {

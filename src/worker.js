@@ -312,6 +312,8 @@ function withCors(response, origin) {
   const headers = new Headers(response.headers);
   const cors = corsHeaders(origin);
 
+  headers.delete('access-control-allow-origin');
+
   for (const [key, value] of Object.entries(cors)) {
     headers.set(key, value);
   }
