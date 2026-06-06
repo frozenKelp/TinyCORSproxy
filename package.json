@@ -1,6 +1,15 @@
 {
   "name": "tinycorsproxy",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run"
+  },
   "dependencies": {
-    "wrangler": "^3.0.0"
+    "wrangler": "^4.98.0"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.8"
   }
 }
