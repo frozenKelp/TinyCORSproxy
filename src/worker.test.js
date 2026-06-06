@@ -84,6 +84,26 @@ describe('preview worker', () => {
     expect(bodyText).not.toContain('secret page body');
   });
 
+  it('allows both frozenkelp canvas origins during HTTPS rollout', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response(sampleHtml, {
+        headers: { 'content-type': 'text/html; charset=utf-8' }
+      }))
+    );
+
+    for (const origin of ['https://frozenkelp.vip', 'http://frozenkelp.vip']) {
+      const response = await worker.fetch(
+        new Request(
+          'https://preview.test/preview?url=https%3A%2F%2Fexample.com%2Fstory',
+          { headers: { origin } }
+        )
+      );
+
+      expect(response.headers.get('access-control-allow-origin')).toBe(origin);
+    }
+  });
+
   it('rejects unsafe preview targets before fetching', async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);

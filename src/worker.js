@@ -3,7 +3,10 @@ const FETCH_TIMEOUT_MS = 4_500;
 const SUCCESS_TTL_SECONDS = 86_400;
 const FAILURE_TTL_SECONDS = 60;
 const LOCAL_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/u;
-const FROZENKELP_ORIGIN = 'https://frozenkelp.vip';
+const FROZENKELP_ORIGINS = new Set([
+  'https://frozenkelp.vip',
+  'http://frozenkelp.vip'
+]);
 
 export default {
   async fetch(request) {
@@ -331,7 +334,7 @@ function corsHeaders(origin) {
     return { ...headers, 'access-control-allow-origin': '*' };
   }
 
-  if (origin === FROZENKELP_ORIGIN || LOCAL_ORIGIN.test(origin)) {
+  if (FROZENKELP_ORIGINS.has(origin) || LOCAL_ORIGIN.test(origin)) {
     return { ...headers, 'access-control-allow-origin': origin };
   }
 
