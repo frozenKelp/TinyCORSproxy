@@ -1,4 +1,4 @@
-name = "canvas-link-preview"
+name = "link-preview"
 main = "src/worker.js"
 compatibility_date = "2026-06-06"
 
