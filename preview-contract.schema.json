@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://frozenkelp.vip/contracts/preview-response.json",
+  "title": "Link preview response",
+  "type": "object",
+  "required": ["url"],
+  "additionalProperties": false,
+  "properties": {
+    "url": { "type": "string", "format": "uri" },
+    "finalUrl": { "type": "string", "format": "uri" },
+    "contentType": { "type": "string" },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "siteName": { "type": "string" },
+    "image": { "type": "string", "format": "uri" },
+    "favicon": { "type": "string", "format": "uri" },
+    "canonicalUrl": { "type": "string", "format": "uri" }
+  }
+}
